@@ -5,7 +5,7 @@ class App {
   }
 
   fetchLists() {
-    fetch('https://flatiron-tasklistr.herokuapp.com/lists?user_id=5')
+    fetch('https://flatiron-tasklistr.herokuapp.com/lists?user_id=6')
       .then(res => res.json())
       .then(json => {
         json.forEach(list => {
@@ -32,7 +32,7 @@ class App {
         'Content-Type':'application/json',
         Accept:'application/json'
       },
-      body:JSON.stringify({user_id:5, title:title})
+      body:JSON.stringify({user_id:6, title:title})
     }
     fetch('https://flatiron-tasklistr.herokuapp.com/lists', options)
       .then(res => res.json())
@@ -60,7 +60,7 @@ class App {
         'Content-Type':'application/json',
         Accept:'application/json'
       },
-      body:JSON.stringify({user_id:5, description:description, priority:priority})
+      body:JSON.stringify({user_id:6, description:description, priority:priority})
     }
     fetch(`https://flatiron-tasklistr.herokuapp.com/lists/${listId}/tasks`, options)
       .then(res => res.json())
