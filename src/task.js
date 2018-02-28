@@ -1,12 +1,10 @@
-/*
-task is responsible for creating a single task object
-*/
 const Task = (() => {
-  let id = 1
   return class Task {
-    constructor(description, priority) {
-      //your code here
+    constructor(id, listId, description, priority) {
+      this.id = id;
+      this.listId = listId;
+      this.description = description;
+      this.priority = priority;
     }
   }
-
 })()
