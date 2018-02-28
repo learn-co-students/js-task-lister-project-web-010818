@@ -1,12 +1,34 @@
 /*
 task is responsible for creating a single task object
 */
+
+
 const Task = (() => {
-  let id = 1
   return class Task {
-    constructor(description, priority) {
-      //your code here
+    constructor(json, listId) {
+      this.description = json.description;
+      this.priority = json.priority;
+      this.id = json.id;
+      this.listId = listId;
+
+
+      this.addTaskToList();
+
+    }
+
+    addTaskToList() {
+      console.log(this)
+      let list = document.getElementById(`list-${this.listId}`)
+      let li = document.createElement('li');
+      li.innerHTML = `Task: ${this.description}<br>Priority: ${this.priority}`
+      list.appendChild(li)
+    }
+
+    static all() {
+      return taskStore
     }
   }
+
+
 
 })()
