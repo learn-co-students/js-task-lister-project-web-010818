@@ -5,11 +5,11 @@ const List = (() => {
   let id = 1
 
   return class List {
-    constructor(title) {
+    constructor(title, id) {
       this.title = title
-      this.id = id++
+      // this.id = id++
+      this.id = id
       store.lists.push(this)
-      // NOTE: How can we use the private id variable to auto increment list ids🤔?
     }
 
     static submitListener(){
@@ -17,9 +17,8 @@ const List = (() => {
       createForm.addEventListener('submit', (event) => {
         event.preventDefault();
         let listInput = event.target.children[1]
-        let list = new List(listInput.value)
-        list.createList()
-        list.updateDropdown()
+        // let list = new List(listInput.value) //FOR NON API VERSION
+        List.postList(listInput.value) //FOR API VERSION
         listInput.value = ""
         taskForm.style.visibility = 'visible'
       })
@@ -32,8 +31,10 @@ const List = (() => {
         for (let i = 0; i < divs.length; i++){
           if(divs[i].dataset.listId === button.dataset.listId){
               foundDiv = divs[i]
-            }
           }
+        }
+        List.deleteList(foundDiv.dataset.listId)
+        List.updateDropdownDelete(foundDiv.dataset.listId)
         listSection.removeChild(foundDiv)
         let remainingDivs = listSection.children
         if (remainingDivs.length === 0) {
@@ -53,15 +54,17 @@ const List = (() => {
       div.append(ul)
       header.innerText += this.title
       listSection.append(div)
-
+      return this
     }
 
-    updateDropdown() {
+    updateDropdownAdd() {
       let option = document.createElement('option')
       option.innerText = this.title
       option.setAttribute("data-list-id", this.id)
       dropdown.append(option)
     }
+
+
 
     createDeleteButton(){
       let button = document.createElement("button")
@@ -70,6 +73,52 @@ const List = (() => {
       button.innerText = "x"
       this.deleteListener(button)
       return button
+    }
+
+    static postList(title) {
+      let body = {"user_id": userId, "title": title};
+      let options = {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json"
+        }
+      }
+      fetch(`${apiEndPoint}/lists`, options)
+        .then(res => res.json())
+        .then((json) => {
+          let list = new List(json.title, json.id)
+          list.createList()
+          list.updateDropdownAdd()
+        })
+    }
+
+    static deleteList(listId) {
+      console.log(listId);
+      let body = {"user_id": userId};
+      let options = {
+        method: "DELETE",
+        body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json"
+        }
+      }
+      fetch(`https://flatiron-tasklistr.herokuapp.com/lists/${listId}`, options)
+        .then(res => res.json())
+        .then(json => console.log(json))
+    }
+
+    static updateDropdownDelete(listId) {
+      let options = dropdown.children
+      let foundOption;
+      for(let i = 0; i < options.length; i++) {
+        if (options[i].dataset.listId == listId) {
+          foundOption = options[i]
+        }
+      }
+      foundOption.outerHTML = ""
     }
 
 
