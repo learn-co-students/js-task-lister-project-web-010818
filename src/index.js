@@ -36,16 +36,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Clear input field and make task form appear
     listInput.value = "";
     taskForm.style.display = "block";
-    // Build new option for new list and append to select in task form
+
+    // Build new option for new list and append to task select form
     const listOption = document.createElement('option');
     listOption.setAttribute('value', newList.id);
+    listOption.setAttribute("id", `option-${newList.id}`)
     listOption.innerText = newList.title;
     selectList.appendChild(listOption);
 
     // Add list to list viewing area
     const showLists = document.getElementById("lists");
     const div = document.createElement('div')
-    div.setAttribute('id', newList.id)
+    div.setAttribute('id', `list-${newList.id}`)
     div.setAttribute("class", "list")
     const h2 = document.createElement('h2');
     const button = document.createElement('button');
@@ -63,14 +65,13 @@ document.addEventListener('DOMContentLoaded', () => {
     button.addEventListener('click', (event) => {
       event.preventDefault()
       //remove div with matching id
-      const div = document.getElementById(event.target.dataset.id)
+      const div = document.getElementById(`list-${event.target.dataset.id}`)
       div.remove()
       deleteList(event.target.dataset.id)
     })
   }
 
   function deleteList(listId) {
-    console.log(listId)
     // DELETE /lists/:list_id
     const url = `https://flatiron-tasklistr.herokuapp.com/lists/${listId}`
     const options = {
@@ -84,7 +85,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetch(url, options)
       .then(res => res.json())
-      .then(json => console.log(json))
+      .then(json => json)
+
+    const listOption = document.getElementById(`option-${listId}`);
+    listOption.remove();
   }
 
   function displayLists() {
@@ -153,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const newTask = new Task(json.id, listId, json.description, json.priority);
     descInput.value = ""
     priInput.value = ""
-    const ul = document.getElementById(listId).getElementsByTagName('ul')[0]
+    const ul = document.getElementById(`list-${listId}`).getElementsByTagName('ul')[0]
     const li = document.createElement('li');
     li.setAttribute('data-id', listId);
     const text = `Task: ${newTask.description} <br> Priority: ${newTask.priority}`;
