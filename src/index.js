@@ -89,6 +89,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const listOption = document.getElementById(`option-${listId}`);
     listOption.remove();
+    if (document.getElementById('parent-list').childNodes.length === 0) {
+      taskForm.style.display = "none";
+    }
   }
 
   function displayLists() {
@@ -105,10 +108,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetch(url, options)
       .then(res => res.json())
-      .then(json => json.forEach((list) => {
-        addList(list)
-        displayTasks(list.id)
-      }))
+      .then(json => {
+        console.log(json.length)
+        if (json.length > 0) {
+          json.forEach((list) => {
+          addList(list);
+          displayTasks(list.id);
+          })
+        } else {
+        taskForm.style.display = "none";
+      }
+    })
   }
 
   taskForm.addEventListener("submit", (event) => {
@@ -150,7 +160,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetch(url, options)
       .then(res => res.json())
-      .then(json => json.forEach((task) => addTask(task, listId)))
+      .then(json => {
+        if (json.length > 0) {
+          json.forEach((task) => addTask(task, listId))
+        }
+      })
   }
 
   function addTask(json, listId) {
