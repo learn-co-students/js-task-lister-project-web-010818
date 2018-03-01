@@ -1,78 +1,79 @@
-const store = {tasks:[], lists: []}
+/*jshint esversion: 6 */
 
+// document.addEventListener("DOMContentLoaded", function() {
+//   let app = new App();
+//   app.addEventListeners();
+//   app.fetchBooks();
+// });
+
+const store = {tasks: [], lists: []};
 document.addEventListener('DOMContentLoaded', () => {
-  console.log("The DOM content has loaded");
+  console.log('The DOM content has loaded');
   addList();
 });
-
 
 function addList() {
   const listForm = document.getElementById('create-list-form');
   listForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    let input = e.target[0].value;
-    new List(input);
-    showSelectList();
+    let newListTitle = e.target[0].value;
+    const newList = new List(newListTitle);
+    addToDropDown(newList);
+    listForm.reset();
   });
 }
 
-function showSelectList() {
-  const box = document.getElementById('new-list-title');
-  box.value = ''
-  let parentList = document.getElementById('parent-list');
-  parentList.innerHTML = ""
-  store.lists.forEach((list) => {
-    let option = document.createElement('option');
-    option.value = list.id;
-    option.text = list.title;
-    parentList.appendChild(option);
-  })
+function addToDropDown(list) {
+  const parentList = document.getElementById('parent-list');
+  const newOption = document.createElement('option');
+  newOption.value = list.id;
+  newOption.text = list.title;
+  parentList.appendChild(newOption);
+  addTask();
 }
 
-addTask();
 function addTask() {
-  let taskForm = document.getElementById('create-task-form');
+  const taskForm = document.getElementById('create-task-form');
   taskForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    let listId = e.target[0].value;
-    let list = store.lists.find((list) => {
-      return list.id === parseInt(listId);
-    })
-    let description = e.target[1].value;
-    let priority = e.target[2].value;
-    let task = new Task(description, priority, list);
-
-    checkExistence(list, task);
+    const listInput = e.target[0].value;
+    const parentList = store.lists.find((list) => {
+      return list.id === parseInt(listInput);
+    });
+    let newTaskDes = e.target[1].value;
+    let newTaskPri = e.target[2].value;
+    const newTask = new Task(newTaskDes, newTaskPri, parentList);
+    findOrCreateListBox(newTask);
+    taskForm.reset();
   });
 }
 
-function checkExistence(list, task) {
-  const listUl = document.getElementById(`${list.id}`)
-  if (listUl) {
-    return addTaskToExistingList(list, task)
-  } else {
-    return addNewListBox(list, task)
+function findOrCreateListBox(task) {
+  const parentList = task.list();
+  const listUl = document.getElementById(parentList.id);
+  if (!listUl) {
+    createListBox(parentList);
   }
+  displayTaskInListBox(task);
 }
 
-function addTaskToExistingList(list, task) {
-  const listUl = document.getElementById(`${list.id}`)
-  let listHtml = `
-    <li>${task.description}
-    <br>${task.priority}
-    </li>`
-  listUl.innerHTML += listHtml;
-}
-
-function addNewListBox(list, task) {
+function createListBox(list) {
   const listContainer = document.getElementById('lists');
   let boxHtml = `
   <div class="list">
     <h2><button data-id="${list.id}" class="delete-list">X</button>${list.title}</h2>
     <ul id="${list.id}">
-      <li>${task.description}
-      <br>${task.priority}</li>
     </ul>
-  </div>`
+  </div>`;
   listContainer.innerHTML += boxHtml;
+}
+
+function displayTaskInListBox(task) {
+  const parentList = task.list();
+  const listUl = document.getElementById(parentList.id);
+  let listHtml = `
+    <li>${task.description}
+    <br>${task.priority}
+    </li>`;
+  listUl.innerHTML += listHtml;
 }
