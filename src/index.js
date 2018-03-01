@@ -1,12 +1,9 @@
 /*jshint esversion: 6 */
 
-// document.addEventListener("DOMContentLoaded", function() {
-//   let app = new App();
-//   app.addEventListeners();
-//   app.fetchBooks();
-// });
-
 const store = {tasks: [], lists: []};
+const createTaskForm = document.getElementById('create-task-form');
+createTaskForm.style.display = 'none';
+
 document.addEventListener('DOMContentLoaded', () => {
   console.log('The DOM content has loaded');
   addList();
@@ -24,6 +21,7 @@ function addList() {
 }
 
 function addToDropDown(list) {
+  createTaskForm.style.display = 'block';
   const parentList = document.getElementById('parent-list');
   const newOption = document.createElement('option');
   newOption.value = list.id;
@@ -33,8 +31,8 @@ function addToDropDown(list) {
 }
 
 function addTask() {
-  const taskForm = document.getElementById('create-task-form');
-  taskForm.addEventListener('submit', (e) => {
+  createTaskForm.addEventListener('submit', (e) => {
+    console.log('clicked')
     e.preventDefault();
     const listInput = e.target[0].value;
     const parentList = store.lists.find((list) => {
@@ -44,7 +42,7 @@ function addTask() {
     let newTaskPri = e.target[2].value;
     const newTask = new Task(newTaskDes, newTaskPri, parentList);
     findOrCreateListBox(newTask);
-    taskForm.reset();
+    createTaskForm.reset();
   });
 }
 
@@ -58,14 +56,14 @@ function findOrCreateListBox(task) {
 }
 
 function createListBox(list) {
-  const listContainer = document.getElementById('lists');
+  const listsContainer = document.getElementById('lists');
   let boxHtml = `
   <div class="list">
     <h2><button data-id="${list.id}" class="delete-list">X</button>${list.title}</h2>
-    <ul id="${list.id}">
-    </ul>
+    <ul id="${list.id}"></ul>
   </div>`;
-  listContainer.innerHTML += boxHtml;
+  listsContainer.innerHTML += boxHtml;
+  deleteListBox(list);
 }
 
 function displayTaskInListBox(task) {
@@ -76,4 +74,14 @@ function displayTaskInListBox(task) {
     <br>${task.priority}
     </li>`;
   listUl.innerHTML += listHtml;
+}
+
+function deleteListBox(list) {
+  const listsContainer = document.getElementById('lists');
+  listsContainer.addEventListener('click', (e) => {
+    if (e.target.className === 'delete-list') {
+      const listBoxDiv = e.target.parentElement.parentElement;
+      listsContainer.removeChild(listBoxDiv);
+    }
+  });
 }
