@@ -15,7 +15,7 @@ const List = (() => {
 
       this.renderDropDown();
       this.renderListBox();
-      this.displayTaskInListBox(tasks)
+      this.displayTaskInListBox(tasks);
       // this.getExistingTasks();
     }
 
@@ -40,7 +40,7 @@ const List = (() => {
     displayTaskInListBox(tasks) {
       const listUl = document.getElementById(this.id);
       for(let i = 0; i < tasks.length; i++) {
-        let task = new Task(tasks[i].description, tasks[i].priority, tasks[i].id)
+        let task = new Task(tasks[i].description, tasks[i].priority, tasks[i].id);
         const taskHtml = task.renderTask();
         listUl.innerHTML += taskHtml;
       }

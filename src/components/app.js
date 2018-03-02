@@ -45,6 +45,7 @@ class App {
       const listId = parseInt(e.target[0].value);
       this.persistNewTask(newTaskDes, newTaskPri, listId);
       this.taskForm.reset();
+
     });
   }
 
@@ -59,12 +60,7 @@ class App {
     };
     fetch(`https://flatiron-tasklistr.herokuapp.com/lists/${listId}/tasks`, options)
       .then(res => res.json())
-      .then(json => this.updateTasks(json));
-  }
-
-  updateTasks(task) {
-    new Task(task.description, task.priority);
-    this.getAllData();
+      .then(json => this.getAllData());
   }
 
   listsContainerListener() {
@@ -74,12 +70,12 @@ class App {
         const listBoxDiv = e.target.parentElement.parentElement;
         listsContainer.removeChild(listBoxDiv);
         let listId = parseInt(e.target.dataset.id);
-        this.deleteList(listId);
+        this.deleteListFromDb(listId);
       }
     });
   }
 
-  deleteList(listId) {
+  deleteListFromDb(listId) {
     const options = {
       method: 'DELETE',
       headers: {
@@ -101,11 +97,15 @@ class App {
 
   allLists(lists) {
     this.lists = lists;
+    const dropdown = document.getElementById('parent-list');
+    dropdown.innerHTML = '';
+    const listsContainer = document.getElementById('lists');
+    listsContainer.innerHTML = '';
     this.displayAll(lists);
   }
 
   displayAll(lists) {
-    for(let i = 0; i < lists.length; i++) {
+    for(let i = lists.length - 1; i >= 0; i--) {
       new List(lists[i].title, lists[i].id, lists[i].tasks);
       let tasks = lists[i].tasks;
       for(let j = 0; j< tasks.length; j++) {
