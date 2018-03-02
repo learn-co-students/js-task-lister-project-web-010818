@@ -3,18 +3,19 @@
 list is responsible for creating a single list component
 */
 const List = (() => {
-  let id = 1;
+  // let id = 1;
   return class List {
-    constructor(title) {
-      this.id = id++;
+    constructor(title, id, tasks) {
       this.title = title;
-      this.tasks =[];
+      this.id = id;
+      this.tasks = tasks;
 
       this.taskForm = document.getElementById('create-task-form');
       this.taskForm.style.display = 'block';
 
       this.renderDropDown();
-      this.renderNewListBox();
+      this.renderListBox();
+      this.displayTaskInListBox(tasks)
       // this.getExistingTasks();
     }
 
@@ -26,7 +27,7 @@ const List = (() => {
       parentList.appendChild(option);
     }
 
-    renderNewListBox() {
+    renderListBox() {
       const listsContainer = document.getElementById('lists');
       let boxHtml = `
       <div class="list">
@@ -34,13 +35,15 @@ const List = (() => {
         <ul id="${this.id}"></ul>
       </div>`;
       listsContainer.innerHTML += boxHtml;
-      // this.listenForDelete();
     }
 
-    displayTaskInListBox(task) {
+    displayTaskInListBox(tasks) {
       const listUl = document.getElementById(this.id);
-      const taskHtml = task.renderTask();
-      listUl.innerHTML += taskHtml;
+      for(let i = 0; i < tasks.length; i++) {
+        let task = new Task(tasks[i].description, tasks[i].priority, tasks[i].id)
+        const taskHtml = task.renderTask();
+        listUl.innerHTML += taskHtml;
+      }
       return listUl;
     }
 

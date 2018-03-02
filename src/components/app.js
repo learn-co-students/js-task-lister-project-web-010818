@@ -1,12 +1,9 @@
 /*jshint esversion: 6 */
 class App {
   constructor() {
-    this.lists = [];
     this.taskForm = document.getElementById('create-task-form');
     this.taskForm.style.display = 'none';
-    this.baseUrl = 'https://flatiron-tasklistr.herokuapp.com';
-    this.userId = 1;
-    this.getExistingData();
+    this.getAllData();
     this.initializeEventListeners();
   }
 
@@ -21,10 +18,23 @@ class App {
     listForm.addEventListener('submit', (e) => {
       e.preventDefault();
       let newListTitle = e.target[0].value;
-      const newList = new List(newListTitle);
-      this.lists.push(newList);
+      this.persistNewList(newListTitle);
       listForm.reset();
     });
+  }
+
+  persistNewList(listTitle) {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify({user_id: 1, title: listTitle})
+    };
+    fetch('https://flatiron-tasklistr.herokuapp.com/lists', options)
+      .then(res => res.json())
+      .then(json => new List(json.title, json.id, json.tasks));
   }
 
   taskFormListener(){
@@ -32,22 +42,37 @@ class App {
       e.preventDefault();
       const newTaskDes = e.target[1].value;
       const newTaskPri = e.target[2].value;
-      const newTask = new Task(newTaskDes, newTaskPri);
       const listId = parseInt(e.target[0].value);
-      const list = this.lists.find((list) => {
-        return list.id === listId;
-      });
-      list.displayTaskInListBox(newTask);
+      this.persistNewTask(newTaskDes, newTaskPri, listId);
       this.taskForm.reset();
     });
+  }
+
+  persistNewTask(description, priority, listId) {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify({user_id: 1, description: description, priority: priority})
+    };
+    fetch(`https://flatiron-tasklistr.herokuapp.com/lists/${listId}/tasks`, options)
+      .then(res => res.json())
+      .then(json => this.updateTasks(json));
+  }
+
+  updateTasks(task) {
+    new Task(task.description, task.priority);
+    this.getAllData();
   }
 
   listsContainerListener() {
     const listsContainer = document.getElementById('lists');
     listsContainer.addEventListener('click', (e) => {
       if (e.target.className === 'delete-list') {
-        // const listBoxDiv = e.target.parentElement.parentElement;
-        // listsContainer.removeChild(listBoxDiv);
+        const listBoxDiv = e.target.parentElement.parentElement;
+        listsContainer.removeChild(listBoxDiv);
         let listId = parseInt(e.target.dataset.id);
         this.deleteList(listId);
       }
@@ -58,28 +83,33 @@ class App {
     const options = {
       method: 'DELETE',
       headers: {
-        'Content-Type': 'application.json',
-        Accept: 'application.json'
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
       },
-      body: JSON.stringify({user_id: this.userId})
+      body: JSON.stringify({user_id: 1})
     };
-    fetch(`${this.baseUrl}/lists/${listId}`, options)
-    .then(res => console.log(res))
+    fetch(`https://flatiron-tasklistr.herokuapp.com/lists/${listId}`, options)
+    .then(res => res.json())
     .then(json => console.log(json));
   }
 
-  getExistingData() {
-    fetch(`${this.baseUrl}/lists?user_id=${this.userId}`)
+  getAllData() {
+    fetch(`https://flatiron-tasklistr.herokuapp.com/lists?user_id=1`)
     .then(res => res.json())
-    .then(json => this.displayExistingData(json));
+    .then(json => this.allLists(json));
   }
 
-  displayExistingData(lists) {
+  allLists(lists) {
+    this.lists = lists;
+    this.displayAll(lists);
+  }
+
+  displayAll(lists) {
     for(let i = 0; i < lists.length; i++) {
-      new List(lists[i].title);
+      new List(lists[i].title, lists[i].id, lists[i].tasks);
       let tasks = lists[i].tasks;
       for(let j = 0; j< tasks.length; j++) {
-        new Task(tasks[i].description, tasks[i].priority);
+        new Task(tasks[j].description, tasks[j].priority);
       }
     }
   }
